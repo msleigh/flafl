@@ -1,0 +1,4 @@
+flafl.log
+*.pyc
+.coverage
+htmlcov

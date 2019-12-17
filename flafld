@@ -1,0 +1,78 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+#set -x
+
+# Usage:
+usage () {
+cat<<USAGE_EOF
+usage: flafld run | start
+   or: flafld stop
+   or: flafld restart
+USAGE_EOF
+}
+
+# Lock file for when the process is running
+PIDFILE="${TMP:-"/tmp"}/.flafl.pid"
+
+# Default action if no command provided is "run"
+CMD="${1:-"run"}"
+
+# Command synonyms
+if [[ "${CMD}" == "run" ]] ; then
+    CMD="start"
+fi
+
+# Allowed commands
+if [[ "${CMD}" != "start" && "${CMD}" != "stop" && "${CMD}" != "restart" ]] ; then
+    echo "Unknown command: ${CMD}" >&2
+    usage >&2
+    exit 1
+fi
+
+# Errors
+if [[ ("${CMD}" == "stop" || "${CMD}" == "restart") && ! -f "${PIDFILE}" ]] ; then
+    echo "Process not running" >&2
+    exit 2
+fi
+if [[ "${CMD}" == "start" ]] ; then
+    if [[ -f "${PIDFILE}" ]] ; then
+        echo "Process already running" >&2
+        exit 3
+    fi
+    if ! command -v flask >/dev/null 2>&1 ; then
+        echo "Command \`flask\` is not available" >&2
+        exit 4
+    fi
+fi
+
+# Control
+if [[ "${CMD}" == "start" ]] ; then
+
+    # Start up Flask application
+    export FLASK_APP=flafl
+    export FLASK_ENV=development
+    export FLASK_RUN_HOST=0.0.0.0
+    export FLASK_RUN_PORT=8080
+    flask run &
+    # Create lock file
+    FLAFL_PID="$!"
+    echo "${FLAFL_PID}" > "${PIDFILE}"
+
+elif [[ "${CMD}" == "stop" ]] ; then
+
+    # Kill process (ID from lock file)
+    FLAFL_PID="$(cat "${PIDFILE}")"
+    kill -- "-$(ps -o pgid= "${FLAFL_PID}" | grep -o '[0-9]*')"
+    # Remove lock file
+    rm "${PIDFILE}"
+
+elif [[ "${CMD}" == "restart" ]] ; then
+
+    eval "$0 stop"
+    eval "$0 start"
+
+fi
+
+exit 0
