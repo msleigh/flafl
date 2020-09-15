@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="flafl",
-    version="0.0.1",
+    version="0.0.2",
     author="M Sleigh",
     author_email="author@example.com",
     description="Flask application for listening to Bitbucket webhooks",
