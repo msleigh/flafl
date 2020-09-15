@@ -57,17 +57,26 @@ class PrCreate(Strategy):
         helpers.log(yaml.dump(specs, default_flow_style=False))
 
         # Trigger the scan of the Bamboo specs repo
-        response = conns["bamb"].get("project/bamboo-specs-repo/repository")
-        helpers.log(
-            "Repos with access to create plans in project bamboo-specs-repo:\n"
-            + response.text
-        )
-        response = conns["bamb"].post(
-            "repository/scan?repositoryName=test_bamboo_specs"
-        )
-        helpers.log("Response from Bamboo scan:\n" + response.text)
-        response = conns["bamb"].post("repository/scan?repositoryId=2673")
-        helpers.log("Response from Bamboo scan:\n" + response.text)
+        try:
+            response = conns["bamb"].get("project/bamboo-specs-repo/repository")
+            api_message = "API call to Bamboo not made."
+        except AttributeError:
+            print("ERROR: cannot scan Bamboo specs repository")
+            api_message = "API call to Bamboo not made."
+        else:
+            helpers.log(
+                "Repos with access to create plans in project bamboo-specs-repo:\n"
+                + response.text
+            )
+            response = conns["bamb"].post(
+                "repository/scan?repositoryName=test_bamboo_specs"
+            )
+            helpers.log("Response from Bamboo scan:\n" + response.text)
+            response = conns["bamb"].post("repository/scan?repositoryId=2673")
+            helpers.log("Response from Bamboo scan:\n" + response.text)
+            api_message = ( "Sent API call to Bamboo and got return code "
+                + str(response.status_code)
+            )
 
         message = (
             "Created PR with ID "
@@ -85,8 +94,7 @@ class PrCreate(Strategy):
             + "/"
             + json_data["pullRequest"]["toRef"]["displayId"]
             + ". "
-            + "Sent API call to Bamboo and got return code "
-            + str(response.status_code)
+            + api_message
         )
 
         return jsonify({"message": message, "status": "success"})

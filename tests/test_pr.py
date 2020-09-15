@@ -89,6 +89,9 @@ def test_valid_pr_opened(client):
     assert (
         json_data["message"]
         == "Created PR with ID 1 from ~user/fork-name/feature-branch-name to project/repo-name/develop. Sent API call to Bamboo and got return code 204"
+        or
+        json_data["message"]
+        == "Created PR with ID 1 from ~user/fork-name/feature-branch-name to project/repo-name/develop. API call to Bamboo not made."
     )
 
 

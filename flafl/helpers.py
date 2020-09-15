@@ -20,13 +20,16 @@ def check_for_jira_ticket(
             + pull_request_title
             + "'"
         )
-        conns["bitb"].post(
-            "projects/"
-            + to_ref_proj
-            + "/repos/"
-            + to_ref_slug
-            + "/pull-requests/"
-            + str(pull_request_id)
-            + "/comments",
-            json={"text": comment},
-        )
+        try:
+            conns["bitb"].post(
+                "projects/"
+                + to_ref_proj
+                + "/repos/"
+                + to_ref_slug
+                + "/pull-requests/"
+                + str(pull_request_id)
+                + "/comments",
+                json={"text": comment},
+            )
+        except AttributeError:
+            print("ERROR: no Bitbucket connection")

@@ -21,35 +21,44 @@ try:
     NETRC_FILE = os.environ["NETRC_FILE"]
 except KeyError:
     print("ERROR: Location of netrc file for Bamboo credentials not specified")
-    raise
+    NETRC_FILE = None
 
 try:
     BAMB_HOSTNAME = os.environ["BAMB_HOSTNAME"]
 except KeyError:
     print("ERROR: Bamboo hostname not specified")
-    raise
+    BAMB_HOSTNAME = None
 
 try:
     BITB_HOSTNAME = os.environ["BITB_HOSTNAME"]
 except KeyError:
     print("ERROR: Bitbucket hostname not specified")
-    raise
+    BITB_HOSTNAME = None
 
 try:
     BITB_PROJECT = os.environ["BITB_PROJECT"]
 except KeyError:
     print("ERROR: Bitbucket project name not specified")
-    raise
+    BITB_PROJECT = None
 
 try:
     BITB_REPO = os.environ["BITB_REPO"]
 except KeyError:
     print("ERROR: Bitbucket repository name not specified")
-    raise
+    BITB_REPO = None
 
 conns = {}
-conns["bamb"] = bamboo.BambooConnection(NETRC_FILE, BAMB_HOSTNAME)
-conns["bitb"] = bamboo.BambooConnection(NETRC_FILE, BITB_HOSTNAME)
+try:
+    conns["bamb"] = bamboo.BambooConnection(NETRC_FILE, BAMB_HOSTNAME)
+except FileNotFoundError:
+    print("ERROR: netrc file not found")
+    conns["bamb"] = None
+
+try:
+    conns["bitb"] = bamboo.BambooConnection(NETRC_FILE, BITB_HOSTNAME)
+except FileNotFoundError:
+    print("ERROR: netrc file not found")
+    conns["bitb"] = None
 
 ## TODO: temporary checks until in routine use --------------------------------
 ## Check contact with Bamboo. (Just make a simple GET API call that lists all projects.)
