@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="flafl",
-    version="0.0.3",
+    version="0.0.4-alpha",
     author="M Sleigh",
     author_email="author@example.com",
     description="Flask application for listening to Bitbucket webhooks",
@@ -19,4 +19,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    scripts=["flafld"],
+    install_requires=["flask"],
 )
