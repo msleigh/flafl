@@ -74,8 +74,8 @@ class PrCreate(Strategy):
             helpers.log("Response from Bamboo scan:\n" + response.text)
             response = conns["bamb"].post("repository/scan?repositoryId=2673")
             helpers.log("Response from Bamboo scan:\n" + response.text)
-            api_message = ( "Sent API call to Bamboo and got return code "
-                + str(response.status_code)
+            api_message = "Sent API call to Bamboo and got return code " + str(
+                response.status_code
             )
 
         message = (

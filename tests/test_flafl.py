@@ -19,12 +19,9 @@ def client():
 
 
 def test_connection_test(client):
-    rv = client.post(endpoint, json={"test":"true"})
+    rv = client.post(endpoint, json={"test": "true"})
     json_data = rv.get_json()
-    assert (
-        json_data["message"]
-        == "Successful connection."
-    )
+    assert json_data["message"] == "Successful connection."
 
 
 def test_no_eventKey(client):

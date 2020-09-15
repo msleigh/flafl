@@ -42,6 +42,7 @@ def test_notCodedYet_1(client):
 # Tests for opened pull requests
 # ------------------------------
 
+
 def test_no_pullRequestKey(client):
     rv = client.post(endpoint, json={"eventKey": "pr:opened"})
     json_data = rv.get_json()
@@ -89,8 +90,7 @@ def test_valid_pr_opened(client):
     assert (
         json_data["message"]
         == "Created PR with ID 1 from ~user/fork-name/feature-branch-name to project/repo-name/develop. Sent API call to Bamboo and got return code 204"
-        or
-        json_data["message"]
+        or json_data["message"]
         == "Created PR with ID 1 from ~user/fork-name/feature-branch-name to project/repo-name/develop. API call to Bamboo not made."
     )
 
@@ -98,16 +98,20 @@ def test_valid_pr_opened(client):
 # Tests for modified pull requests
 # --------------------------------
 
+
 def test_no_fromRef(client):
     rv = client.post(
         endpoint,
         json={
             "eventKey": "pr:modified",
-            "pullRequest": {"id": "1", "title": "pull request title",
+            "pullRequest": {
+                "id": "1",
+                "title": "pull request title",
                 "toRef": {
                     "displayId": "develop",
                     "repository": {"slug": "repo-name", "project": {"key": "project"}},
-                }},
+                },
+            },
         },
     )
     json_data = rv.get_json()
@@ -119,11 +123,15 @@ def test_no_latestCommit(client):
         endpoint,
         json={
             "eventKey": "pr:modified",
-            "pullRequest": {"id": 1, "title": "pull request title", "fromRef": "null",
+            "pullRequest": {
+                "id": 1,
+                "title": "pull request title",
+                "fromRef": "null",
                 "toRef": {
                     "displayId": "develop",
                     "repository": {"slug": "repo-name", "project": {"key": "project"}},
-                }},
+                },
+            },
         },
     )
     json_data = rv.get_json()
@@ -198,6 +206,7 @@ def test_valid_pr_modified(client):
 # Tests for pull request comments
 # -------------------------------
 
+
 def test_no_comment(client):
     rv = client.post(
         endpoint, json={"eventKey": "pr:comment", "pullRequest": {"id": "1"}}
@@ -265,6 +274,7 @@ def test_valid_pr_comment_deleted(client):
 # Tests for removed pull requests
 # -------------------------------
 
+
 class TestPrDestroyed(object):
     def pr_destroyed(self, client, trigger):
         rv = client.post(
@@ -282,7 +292,10 @@ class TestPrDestroyed(object):
                     },
                     "toRef": {
                         "displayId": "develop",
-                        "repository": {"slug": "repo-name", "project": {"key": "project"}},
+                        "repository": {
+                            "slug": "repo-name",
+                            "project": {"key": "project"},
+                        },
                     },
                 },
             },
@@ -305,5 +318,3 @@ class TestPrDestroyed(object):
     def test_valid_pr_declined(self, client):
         trigger = "declined"
         self.pr_destroyed(client, trigger)
-
-
