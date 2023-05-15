@@ -31,4 +31,3 @@ jobs:
       - name: Check syntax
         run:
           black --check .
-
