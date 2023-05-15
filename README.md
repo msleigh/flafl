@@ -20,9 +20,9 @@ It assumes the main purpose is to trigger test plans in an associated Bamboo ins
 
     git clone .../flafl.git
     cd flafl
-    python3 -m venv /path/to/virtual/environment
-    source /path/to/virtual/environment/bin/activate
-    pip3 install -r requirements.txt
+    python3 -m venv .venv
+    source .venv
+    python3 -m pip install -r requirements.txt
 
 ## Local configuration
 
@@ -95,7 +95,7 @@ applications should be:
         "payloadReceived": {
           "test": true
         }
-      }, 
+      },
       "message": "Successful connection."
     }
 
