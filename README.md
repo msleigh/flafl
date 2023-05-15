@@ -2,6 +2,9 @@
 
 <h2 align="center">Flask Application For Listening...</h2>
 
+[![PyPI](https://img.shields.io/pypi/v/flafl.svg)](https://pypi.org/project/flafl/)
+[![Changelog](https://img.shields.io/github/v/release/msleigh/flafl?include_prereleases&label=changelog)](https://github.com/msleigh/flafl/releases)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/msleigh/flafl/blob/main/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
 Listens for events triggered by Webhooks in an Atlassian Bitbucket
@@ -13,18 +16,17 @@ It assumes the main purpose is to trigger test plans in an associated Bamboo ins
 
 ## Requirements
 
-- User must have a netrc file containing valid login details for the Bamboo
-  hostname used
+FLAFL requires Python 3.7+. It is tested on Linux and macOS.
+
+You  must have a netrc file containing valid login details for the Bamboo hostname used.
 
 ## Installation
 
-    git clone .../flafl.git
-    cd flafl
-    python3 -m venv .venv
-    source .venv
-    python3 -m pip install -r requirements.txt
+FLAFL is published as a Python package and can be installed with `pip`, ideally by using a virtual environment. Open up a terminal and install with:
 
-## Local configuration
+    pip install flafl
+
+## Configuration
 
 Export the following variables with the correct information:
 
