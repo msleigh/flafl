@@ -34,8 +34,6 @@ jobs:
             python3 -m poetry install
 
       - name: Run tests
-        run:
+        run: |
+          python3 -m poetry run black . --check
           python3 -m poetry run python3 -m pytest -v
-#      - name: Check syntax
-#        run:
-#          black --check .
