@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flafl"
-version = "0.0.5"
+version = "0.0.6"
 description = "Flask application for listening to webhooks"
 authors = ["msleigh <msleigh@noreply.users.github.com>"]
 license = "Apache-2.0"
