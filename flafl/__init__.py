@@ -85,7 +85,6 @@ def handle_invalid_usage(error):
 
 @app.route("/flafl/api/v1.0/events", methods=["POST"])
 def post_event():
-
     debug_info = {}
     debug_info["payloadReceived"] = request.json
 
@@ -104,7 +103,6 @@ def post_event():
 
     # Select the appropriate strategy
     if event_key.startswith("pr:"):
-
         if event_trigger == "opened":
             concrete_strategy = strategies.PrCreate()
 
@@ -124,7 +122,6 @@ def post_event():
             concrete_strategy = strategies.PrComment()
 
     if event_key.startswith("repo:"):
-
         if event_trigger == "refs_changed":
             concrete_strategy = strategies.RepoPush()
 

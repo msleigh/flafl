@@ -29,7 +29,6 @@ class PrCreate(Strategy):
     """Class for pull-request creation response."""
 
     def execute(self, json_data, debug_info, conns):
-
         jsonparser.verify_pull_request_id(json_data, debug_info)
 
         # Get the required info from the PR webhook payload
@@ -104,7 +103,6 @@ class PrDestroy(Strategy):
     """Class for pull-request closure response."""
 
     def execute(self, json_data, debug_info, conns):
-
         jsonparser.verify_pull_request_id(json_data, debug_info)
 
         message = (
@@ -122,7 +120,6 @@ class PrModify(Strategy):
     """Class for pull-request modification response."""
 
     def execute(self, json_data, debug_info, conns):
-
         jsonparser.verify_pull_request_id(json_data, debug_info)
 
         pull_request_id = json_data["pullRequest"]["id"]
