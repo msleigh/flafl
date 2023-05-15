@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "flafl"
+version = "0.0.5"
+description = "Flask application for listening to webhooks"
+authors = ["msleigh <msleigh@noreply.users.github.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{include = "flafl"}]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+"homepage" = "https://github.com/msleigh/flafl"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/msleigh/flafl/issues"
+"CI" = "https://github.com/msleigh/flafl/actions"
+"Changelog" = "https://github.com/msleigh/flafl/releases"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "^2.3.2"
+requests = "^2.30.0"
+pyyaml = "^6.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+pytest = "^7.3.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
