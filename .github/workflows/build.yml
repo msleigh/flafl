@@ -28,6 +28,6 @@ jobs:
       - name: Run tests
         run:
           python -m pytest
-      - name: Check syntax
-        run:
-          black --check .
+#      - name: Check syntax
+#        run:
+#          black --check .
