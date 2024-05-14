@@ -1,28 +1,31 @@
 # FLAFL
 
-<h2 align="center">Flask Application For Listening...</h2>
-
 [![PyPI](https://img.shields.io/pypi/v/flafl.svg)](https://pypi.org/project/flafl/)
 [![Changelog](https://img.shields.io/github/v/release/msleigh/flafl?include_prereleases&label=changelog)](https://github.com/msleigh/flafl/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/msleigh/flafl/blob/main/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
+Flask application for listening to webhooks
+
 Listens for events triggered by Webhooks in an Atlassian Bitbucket
 server and responds.
 
-It assumes the main purpose is to trigger test plans in an associated Bamboo instance, but can be persuaded to take other actions.
+It assumes the main purpose is to trigger test plans in an associated Bamboo
+instance, but can be persuaded to take other actions.
 
 ---
 
 ## Requirements
 
-FLAFL requires Python 3.7+. It is tested on Linux and macOS.
+FLAFL requires Python 3.8+. It is tested on Linux and macOS.
 
-You  must have a netrc file containing valid login details for the Bamboo hostname used.
+You  must have a netrc file containing valid login details for the Bamboo
+hostname used.
 
 ## Installation
 
-FLAFL is published as a Python package and can be installed with `pip`, ideally by using a virtual environment. Open up a terminal and install with:
+FLAFL is published as a Python package and can be installed with `pip`,
+ideally by using a virtual environment. Open up a terminal and install with:
 
     pip install flafl
 
@@ -74,12 +77,13 @@ to control the service. Specifically:
 - `flafld stop` stops the process (and its children)
 - `flafld restart` stops the running service and starts it again
 
-On starting the service, the port number of the Flask application is printed. Make a
-note of this for use in setting webhooks up in Bitbucket.
+On starting the service, the port number of the Flask application is printed.
+Make a note of this for use in setting webhooks up in Bitbucket.
 
 ## Bitbucket configuration
 
-In a browser, go to the webhook set-up page of your repository in your Bitbucket server:
+In a browser, go to the webhook set-up page of your repository in your Bitbucket
+server:
 
     https://<bitbucket.yourorg.com>/plugins/servlet/webhooks/projects/<project>/repos/<repo>
 
