@@ -1,8 +1,12 @@
-import abc
-import yaml
-from flask import jsonify
+"""
+Strategies for handling GitHub webhook events and updating Jira.
 
-# import subprocess
+Each strategy handles a specific type of GitHub event and performs
+the appropriate Jira transitions.
+"""
+
+import abc
+from flask import jsonify
 
 from . import exceptions
 from . import helpers
@@ -21,187 +25,234 @@ class Strategy:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def execute(self, json_data, debug_info, conns):
+    def execute(self, json_data, debug_info, conns, config):
         pass
 
 
-class PrCreate(Strategy):
-    """Class for pull-request creation response."""
+class PrOpened(Strategy):
+    """Strategy for when a pull request is opened."""
 
-    def execute(self, json_data, debug_info, conns):
-        jsonparser.verify_pull_request_id(json_data, debug_info)
+    def execute(self, json_data, debug_info, conns, config):
+        pr_info = jsonparser.get_pr_info(json_data, debug_info)
+        jira_keys = jsonparser.extract_jira_keys_from_pr(json_data, debug_info)
 
-        # Get the required info from the PR webhook payload
-        pull_request_id = json_data["pullRequest"]["id"]
-        pull_request_title = json_data["pullRequest"]["title"]
-        to_ref_slug = json_data["pullRequest"]["toRef"]["repository"]["slug"]
-        to_ref_proj = json_data["pullRequest"]["toRef"]["repository"]["project"]["key"]
+        results = []
 
-        # Run basic checks on the pull request
-        helpers.check_for_jira_ticket(
-            conns, to_ref_proj, to_ref_slug, pull_request_id, pull_request_title
-        )
-
-        # Add the new plan (for this PR) to the Bamboo specs
-        specs = {
-            "version": 2,
-            "plan": {
-                "project-key": "bamboo-specs-repo",
-                "key": to_ref_slug + str(pull_request_id),
-                "name": pull_request_title,
-            },
-            "stages": [{"Stage 1": {"jobs": ["Job 1"]}}],
-            "Job 1": {"tasks": [{"script": ["echo 'Test YAML spec'"]}]},
-        }
-        helpers.log(yaml.dump(specs, default_flow_style=False))
-
-        # Trigger the scan of the Bamboo specs repo
-        try:
-            response = conns["bamb"].get("project/bamboo-specs-repo/repository")
-            api_message = "API call to Bamboo not made."
-        except AttributeError:
-            print("ERROR: cannot scan Bamboo specs repository")
-            api_message = "API call to Bamboo not made."
+        # Check if PR has Jira ticket reference
+        if not jira_keys:
+            # Add comment to PR asking for Jira ticket
+            helpers.add_missing_jira_comment(conns, pr_info)
+            results.append("No Jira keys found in PR - comment added")
         else:
-            helpers.log(
-                "Repos with access to create plans in project bamboo-specs-repo:\n"
-                + response.text
-            )
-            response = conns["bamb"].post(
-                "repository/scan?repositoryName=test_bamboo_specs"
-            )
-            helpers.log("Response from Bamboo scan:\n" + response.text)
-            response = conns["bamb"].post("repository/scan?repositoryId=2673")
-            helpers.log("Response from Bamboo scan:\n" + response.text)
-            api_message = "Sent API call to Bamboo and got return code " + str(
-                response.status_code
-            )
+            # Transition each Jira ticket to "In Review" (or configured status)
+            target_status = config.get("status_on_pr_opened", "In Review")
+            for key in jira_keys:
+                success, msg = helpers.transition_jira_issue(
+                    conns, key, target_status, pr_info
+                )
+                results.append(msg)
 
-        message = (
-            "Created PR with ID "
-            + str(pull_request_id)
-            + " from "
-            + json_data["pullRequest"]["fromRef"]["repository"]["project"]["key"]
-            + "/"
-            + json_data["pullRequest"]["fromRef"]["repository"]["slug"]
-            + "/"
-            + json_data["pullRequest"]["fromRef"]["displayId"]
-            + " to "
-            + json_data["pullRequest"]["toRef"]["repository"]["project"]["key"]
-            + "/"
-            + json_data["pullRequest"]["toRef"]["repository"]["slug"]
-            + "/"
-            + json_data["pullRequest"]["toRef"]["displayId"]
-            + ". "
-            + api_message
-        )
-
-        return jsonify({"message": message, "status": "success"})
+        message = f"PR #{pr_info['number']} opened: {pr_info['title']}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "results": results,
+        })
 
 
-class PrDestroy(Strategy):
-    """Class for pull-request closure response."""
+class PrClosed(Strategy):
+    """Strategy for when a pull request is closed (merged or declined)."""
 
-    def execute(self, json_data, debug_info, conns):
-        jsonparser.verify_pull_request_id(json_data, debug_info)
+    def execute(self, json_data, debug_info, conns, config):
+        pr_info = jsonparser.get_pr_info(json_data, debug_info)
+        jira_keys = jsonparser.extract_jira_keys_from_pr(json_data, debug_info)
+        was_merged = jsonparser.is_pr_merged(json_data)
 
-        message = (
-            "Destroyed PR with ID "
-            + str(json_data["pullRequest"]["id"])
-            + " in repository "
-            + json_data["pullRequest"]["fromRef"]["repository"]["project"]["key"]
-            + "/"
-            + json_data["pullRequest"]["toRef"]["repository"]["slug"]
-        )
-        return jsonify({"message": message, "status": "success"})
+        results = []
+
+        if jira_keys:
+            if was_merged:
+                # PR was merged - transition to "Done" or configured status
+                target_status = config.get("status_on_pr_merged", "Done")
+                for key in jira_keys:
+                    success, msg = helpers.transition_jira_issue(
+                        conns, key, target_status, pr_info
+                    )
+                    results.append(msg)
+                action = "merged"
+            else:
+                # PR was closed without merge - optionally transition back
+                target_status = config.get("status_on_pr_declined")
+                if target_status:
+                    for key in jira_keys:
+                        success, msg = helpers.transition_jira_issue(
+                            conns, key, target_status, pr_info
+                        )
+                        results.append(msg)
+                action = "closed without merge"
+        else:
+            action = "merged" if was_merged else "closed"
+            results.append("No Jira keys found in PR")
+
+        message = f"PR #{pr_info['number']} {action}: {pr_info['title']}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "merged": was_merged,
+            "results": results,
+        })
 
 
-class PrModify(Strategy):
-    """Class for pull-request modification response."""
+class PrSynchronize(Strategy):
+    """Strategy for when a pull request is updated with new commits."""
 
-    def execute(self, json_data, debug_info, conns):
-        jsonparser.verify_pull_request_id(json_data, debug_info)
+    def execute(self, json_data, debug_info, conns, config):
+        pr_info = jsonparser.get_pr_info(json_data, debug_info)
+        jira_keys = jsonparser.extract_jira_keys_from_pr(json_data, debug_info)
 
-        pull_request_id = json_data["pullRequest"]["id"]
-        pull_request_title = json_data["pullRequest"]["title"]
-        to_ref_slug = json_data["pullRequest"]["toRef"]["repository"]["slug"]
-        to_ref_proj = json_data["pullRequest"]["toRef"]["repository"]["project"]["key"]
+        # Optionally add a comment to Jira about the new commits
+        results = []
+        if jira_keys and config.get("comment_on_pr_sync", False):
+            for key in jira_keys:
+                success, msg = helpers.add_jira_comment(
+                    conns,
+                    key,
+                    f"PR #{pr_info['number']} updated with new commits. "
+                    f"Latest: {pr_info['head_sha'][:7]}"
+                )
+                results.append(msg)
 
-        helpers.check_for_jira_ticket(
-            conns, to_ref_proj, to_ref_slug, pull_request_id, pull_request_title
-        )
+        message = f"PR #{pr_info['number']} synchronized: {pr_info['head_sha'][:7]}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "head_sha": pr_info["head_sha"],
+            "results": results,
+        })
 
-        # Get the fromRef latestCommit
-        from_ref_latest_commit = jsonparser.get_from_ref_latest_commit(
-            json_data, debug_info
-        )
 
-        event_key, event_trigger = jsonparser.get_event_key(json_data, debug_info)
-        message = (
-            "status:"
-            + "success"
-            + "from_ref_latest_commit:"
-            + from_ref_latest_commit
-            + "eventKey:"
-            + event_key
-            + "pull_request_id:"
-            + ""
-            + "eventTrigger:"
-            + event_trigger
-        )
-        return jsonify(
-            {"message": message, "status": "success", "payload": from_ref_latest_commit}
-        )
+class PrReviewSubmitted(Strategy):
+    """Strategy for when a pull request review is submitted."""
+
+    def execute(self, json_data, debug_info, conns, config):
+        pr_info = jsonparser.get_pr_info(json_data, debug_info)
+        review_info = jsonparser.get_review_info(json_data, debug_info)
+        jira_keys = jsonparser.extract_jira_keys_from_pr(json_data, debug_info)
+
+        results = []
+        review_state = review_info["state"]
+
+        if jira_keys:
+            if review_state == "approved":
+                # Review approved - optionally transition to "Approved" or similar
+                target_status = config.get("status_on_review_approved")
+                if target_status:
+                    for key in jira_keys:
+                        success, msg = helpers.transition_jira_issue(
+                            conns, key, target_status, pr_info
+                        )
+                        results.append(msg)
+
+            elif review_state == "changes_requested":
+                # Changes requested - optionally transition back to "In Progress"
+                target_status = config.get("status_on_changes_requested")
+                if target_status:
+                    for key in jira_keys:
+                        success, msg = helpers.transition_jira_issue(
+                            conns, key, target_status, pr_info
+                        )
+                        results.append(msg)
+
+        message = f"PR #{pr_info['number']} review {review_state} by {review_info['user']}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "review_state": review_state,
+            "reviewer": review_info["user"],
+            "results": results,
+        })
 
 
 class PrComment(Strategy):
-    """Class for pull-request comment responses."""
+    """Strategy for comments on pull requests."""
 
-    def execute(self, json_data, debug_info, conns):
-        """Strategy for pull-request comment events."""
-        jsonparser.verify_pull_request_id(json_data, debug_info)
+    def execute(self, json_data, debug_info, conns, config):
+        # For issue_comment events, PR info is in 'issue' not 'pull_request'
+        issue = json_data.get("issue", {})
+        comment_info = jsonparser.get_comment_info(json_data, debug_info)
 
-        # Check for comment field in JSON
-        if "comment" not in json_data:
-            message = "Payload for comment event did not contain comment key"
-            debug_info["receivedPayload"] = json_data
-            raise INVALID_USAGE(message, status_code=410, payload=debug_info)
-        if "author" not in json_data["comment"]:
-            message = "Payload for comment event did not contain author key"
-            debug_info["receivedPayload"] = json_data
-            raise INVALID_USAGE(message, status_code=410, payload=debug_info)
-        if "name" not in json_data["comment"]["author"]:
-            message = "Payload for comment event did not contain name key"
-            debug_info["receivedPayload"] = json_data
-            raise INVALID_USAGE(message, status_code=410, payload=debug_info)
+        pr_number = issue.get("number")
+        pr_title = issue.get("title", "")
 
-        message = "Comment by " + json_data["comment"]["author"]["name"]
+        # Extract Jira keys from the issue/PR title
+        jira_keys = jsonparser.extract_jira_keys(pr_title)
 
-        # Do something...
-
-        return jsonify({"message": message, "status": "success"})
+        message = f"Comment on PR #{pr_number} by {comment_info['user']}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "commenter": comment_info["user"],
+        })
 
 
-class RepoPush(Strategy):
-    """Class for repository-based webhook responses."""
+class Push(Strategy):
+    """Strategy for push events (direct pushes to branches)."""
 
-    def execute(self, json_data, debug_info, conns):
-        """Strategy for repository-based webhooks."""
-        event_key, _ = jsonparser.get_event_key(json_data, debug_info)
-        message = "Repository received push"
-        success_payload = {
-            "eventKey": event_key,
-            "project": json_data["repository"]["project"]["key"],
-        }
-        return jsonify({"message": message, "payload": success_payload})
+    def execute(self, json_data, debug_info, conns, config):
+        ref = json_data.get("ref", "")
+        commits = json_data.get("commits", [])
+        repo = json_data.get("repository", {})
+
+        # Extract Jira keys from commit messages
+        jira_keys = set()
+        for commit in commits:
+            commit_msg = commit.get("message", "")
+            jira_keys.update(jsonparser.extract_jira_keys(commit_msg))
+
+        jira_keys = list(jira_keys)
+
+        message = f"Push to {ref} with {len(commits)} commits"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "jira_keys": jira_keys,
+            "ref": ref,
+            "commit_count": len(commits),
+        })
 
 
-class RepoAll(Strategy):
-    """Class for repository-based webhook responses."""
+class Ping(Strategy):
+    """Strategy for GitHub ping events (webhook setup verification)."""
 
-    def execute(self, json_data, debug_info, conns):
-        """Strategy for repository-based webhooks."""
-        event_key, _ = jsonparser.get_event_key(json_data, debug_info)
-        message = "Trigger-handling for eventKey not coded yet"
-        success_payload = {"eventKey": event_key}
-        return jsonify({"message": message, "payload": success_payload})
+    def execute(self, json_data, debug_info, conns, config):
+        zen = json_data.get("zen", "")
+        hook_id = json_data.get("hook_id")
+
+        message = f"Pong! Webhook {hook_id} connected successfully."
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "zen": zen,
+            "hook_id": hook_id,
+        })
+
+
+class Unhandled(Strategy):
+    """Strategy for unhandled event types."""
+
+    def execute(self, json_data, debug_info, conns, config):
+        event_type = debug_info.get("event_type", "unknown")
+        action = debug_info.get("action", "unknown")
+
+        message = f"Received unhandled event: {event_type}/{action}"
+        return jsonify({
+            "status": "success",
+            "message": message,
+            "event_type": event_type,
+            "action": action,
+        })
