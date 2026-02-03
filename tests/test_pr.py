@@ -65,7 +65,30 @@ def test_pr_opened_with_jira_key(client):
 
 def test_pr_opened_without_jira_key(client):
     """Test PR opened event without Jira key triggers comment."""
-    payload = make_pr_payload(action="opened", title="Add new feature without ticket")
+    # Create payload without Jira key in title or branch
+    payload = {
+        "action": "opened",
+        "number": 1,
+        "pull_request": {
+            "number": 1,
+            "title": "Add new feature without ticket",
+            "state": "open",
+            "merged": False,
+            "html_url": "https://github.com/owner/repo/pull/1",
+            "user": {"login": "testuser"},
+            "head": {
+                "sha": "abc1234567890123456789012345678901234567",
+                "ref": "feature/add-new-feature",  # No Jira key in branch
+            },
+            "base": {
+                "ref": "main",
+                "repo": {
+                    "name": "test-repo",
+                    "owner": {"login": "test-owner"},
+                },
+            },
+        },
+    }
     rv = client.post(
         endpoint,
         json=payload,
