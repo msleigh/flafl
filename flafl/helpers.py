@@ -70,7 +70,9 @@ def transition_jira_issue(conns, issue_key, target_status, pr_info):
     pr_number = pr_info.get("number", "")
     pr_title = pr_info.get("title", "")
 
-    comment = f"PR #{pr_number} ({pr_title}) - transitioning to {target_status}\n{pr_url}"
+    comment = (
+        f"PR #{pr_number} ({pr_title}) - transitioning to {target_status}\n{pr_url}"
+    )
 
     try:
         jira_conn.add_comment(issue_key, comment)

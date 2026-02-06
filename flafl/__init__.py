@@ -60,7 +60,9 @@ conns = {}
 
 try:
     if JIRA_BASE_URL and JIRA_USER_EMAIL and JIRA_API_TOKEN:
-        conns["jira"] = jira.JiraConnection(JIRA_BASE_URL, JIRA_USER_EMAIL, JIRA_API_TOKEN)
+        conns["jira"] = jira.JiraConnection(
+            JIRA_BASE_URL, JIRA_USER_EMAIL, JIRA_API_TOKEN
+        )
     else:
         conns["jira"] = None
         print("WARNING: Jira connection not configured")
@@ -186,8 +188,10 @@ def select_strategy(event_type, action):
 @app.route("/flafl/api/v1.0/health", methods=["GET"])
 def health_check():
     """Health check endpoint."""
-    return jsonify({
-        "status": "healthy",
-        "jira_connected": conns.get("jira") is not None,
-        "github_connected": conns.get("github") is not None,
-    })
+    return jsonify(
+        {
+            "status": "healthy",
+            "jira_connected": conns.get("jira") is not None,
+            "github_connected": conns.get("github") is not None,
+        }
+    )

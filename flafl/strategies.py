@@ -53,12 +53,14 @@ class PrOpened(Strategy):
                 results.append(msg)
 
         message = f"PR #{pr_info['number']} opened: {pr_info['title']}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "results": results,
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "results": results,
+            }
+        )
 
 
 class PrClosed(Strategy):
@@ -96,13 +98,15 @@ class PrClosed(Strategy):
             results.append("No Jira keys found in PR")
 
         message = f"PR #{pr_info['number']} {action}: {pr_info['title']}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "merged": was_merged,
-            "results": results,
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "merged": was_merged,
+                "results": results,
+            }
+        )
 
 
 class PrSynchronize(Strategy):
@@ -120,18 +124,20 @@ class PrSynchronize(Strategy):
                     conns,
                     key,
                     f"PR #{pr_info['number']} updated with new commits. "
-                    f"Latest: {pr_info['head_sha'][:7]}"
+                    f"Latest: {pr_info['head_sha'][:7]}",
                 )
                 results.append(msg)
 
         message = f"PR #{pr_info['number']} synchronized: {pr_info['head_sha'][:7]}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "head_sha": pr_info["head_sha"],
-            "results": results,
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "head_sha": pr_info["head_sha"],
+                "results": results,
+            }
+        )
 
 
 class PrReviewSubmitted(Strategy):
@@ -166,15 +172,19 @@ class PrReviewSubmitted(Strategy):
                         )
                         results.append(msg)
 
-        message = f"PR #{pr_info['number']} review {review_state} by {review_info['user']}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "review_state": review_state,
-            "reviewer": review_info["user"],
-            "results": results,
-        })
+        message = (
+            f"PR #{pr_info['number']} review {review_state} by {review_info['user']}"
+        )
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "review_state": review_state,
+                "reviewer": review_info["user"],
+                "results": results,
+            }
+        )
 
 
 class PrComment(Strategy):
@@ -192,12 +202,14 @@ class PrComment(Strategy):
         jira_keys = jsonparser.extract_jira_keys(pr_title)
 
         message = f"Comment on PR #{pr_number} by {comment_info['user']}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "commenter": comment_info["user"],
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "commenter": comment_info["user"],
+            }
+        )
 
 
 class Push(Strategy):
@@ -217,13 +229,15 @@ class Push(Strategy):
         jira_keys = list(jira_keys)
 
         message = f"Push to {ref} with {len(commits)} commits"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "jira_keys": jira_keys,
-            "ref": ref,
-            "commit_count": len(commits),
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "jira_keys": jira_keys,
+                "ref": ref,
+                "commit_count": len(commits),
+            }
+        )
 
 
 class Ping(Strategy):
@@ -234,12 +248,14 @@ class Ping(Strategy):
         hook_id = json_data.get("hook_id")
 
         message = f"Pong! Webhook {hook_id} connected successfully."
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "zen": zen,
-            "hook_id": hook_id,
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "zen": zen,
+                "hook_id": hook_id,
+            }
+        )
 
 
 class Unhandled(Strategy):
@@ -250,9 +266,11 @@ class Unhandled(Strategy):
         action = debug_info.get("action", "unknown")
 
         message = f"Received unhandled event: {event_type}/{action}"
-        return jsonify({
-            "status": "success",
-            "message": message,
-            "event_type": event_type,
-            "action": action,
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": message,
+                "event_type": event_type,
+                "action": action,
+            }
+        )

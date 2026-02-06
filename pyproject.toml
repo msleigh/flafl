@@ -1,11 +1,15 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "flafl"
 version = "0.0.6"
 description = "Flask application for listening to webhooks"
-authors = ["msleigh <msleigh@noreply.users.github.com>"]
-license = "Apache-2.0"
 readme = "README.md"
-packages = [{include = "flafl"}]
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [{ name = "msleigh", email = "msleigh@noreply.users.github.com" }]
 classifiers = [
     "Development Status :: 1 - Planning",
     "License :: OSI Approved :: Apache Software License",
@@ -13,29 +17,28 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
 ]
-"homepage" = "https://github.com/msleigh/flafl"
+dependencies = [
+    "flask>=2.3.2,<3.0.0",
+    "requests>=2.32.0,<3.0.0",
+    "pyyaml>=6.0,<7.0",
+    "urllib3>=2.2.2,<3.0.0",
+    "werkzeug>=3.0.6,<4.0.0",
+    "jinja2>=3.1.6,<4.0.0",
+]
 
-[tool.poetry.urls]
+[project.urls]
+Homepage = "https://github.com/msleigh/flafl"
 "Bug Tracker" = "https://github.com/msleigh/flafl/issues"
-"CI" = "https://github.com/msleigh/flafl/actions"
-"Changelog" = "https://github.com/msleigh/flafl/releases"
+CI = "https://github.com/msleigh/flafl/actions"
+Changelog = "https://github.com/msleigh/flafl/releases"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-Flask = "^2.3.2"
-requests = "^2.32.0"
-pyyaml = "^6.0"
-urllib3 = "^2.2.2"
-Werkzeug = "^3.0.6"
-Jinja2 = "^3.1.6"
+[dependency-groups]
+dev = [
+    "black>=24.3.0,<25.0.0",
+    "coverage>=7.0.0,<8.0.0",
+    "pytest>=7.3.1,<8.0.0",
+]
+doc = ["mkdocs-material>=9.1.12,<10.0.0"]
 
-[tool.poetry.group.doc.dependencies]
-mkdocs-material = "^9.1.12"
-
-[tool.poetry.group.dev.dependencies]
-black = "^24.3.0"
-pytest = "^7.3.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools.packages.find]
+include = ["flafl*"]

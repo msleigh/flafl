@@ -43,21 +43,22 @@ but do not need to have the correct values.
 
 ## Tests
 
-To check set-up, run:
+To set up and run tests with `uv`, run:
 
-    python3 -m pytest
+    uv sync --group dev
+    uv run pytest
 
 or to get test-coverage information run:
 
-    coverage run -m pytest
+    uv run coverage run -m pytest
 
 which allows a test-coverage report to be produced:
 
-    coverage report
+    uv run coverage report
 
 or as a web page:
 
-    coverage html
+    uv run coverage html
     xdg-open htmlcov/index.html
 
 ## Usage

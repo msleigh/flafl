@@ -2,10 +2,10 @@ name: Build and Test
 
 on:
   pull_request:
-    branch:
+    branches:
       - main
   push:
-    branch:
+    branches:
       - main
 
 jobs:
@@ -16,25 +16,23 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache-dependency-path: pyproject.toml
 
-      - name: Install and configure Poetry
-        run: |
-          python3 -m pip install poetry==1.4.2
-          python3 -m poetry config virtualenvs.in-project true
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-            python3 -m poetry install
+        run: uv sync --group dev --group doc
 
       - name: Run tests
         run: |
-          python3 -m poetry run black . --check
-          python3 -m poetry run python3 -m pytest -v
-          python3 -m poetry run mkdocs build --config-file docs/mkdocs.yml --strict
+          uv run black . --check
+          uv run pytest -v
+          uv run mkdocs build --config-file docs/mkdocs.yml --strict

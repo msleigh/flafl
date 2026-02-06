@@ -129,7 +129,10 @@ class JiraConnection:
             if transition["name"].lower() == target_status.lower():
                 return transition["id"]
             # Also check the target status name
-            if transition.get("to", {}).get("name", "").lower() == target_status.lower():
+            if (
+                transition.get("to", {}).get("name", "").lower()
+                == target_status.lower()
+            ):
                 return transition["id"]
         return None
 

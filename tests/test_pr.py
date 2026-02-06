@@ -159,7 +159,9 @@ def test_pr_merged(client):
 
 def test_pr_closed_not_merged(client):
     """Test PR closed without merge."""
-    payload = make_pr_payload(action="closed", title="PROJ-999: Closed PR", merged=False)
+    payload = make_pr_payload(
+        action="closed", title="PROJ-999: Closed PR", merged=False
+    )
     rv = client.post(
         endpoint,
         json=payload,
