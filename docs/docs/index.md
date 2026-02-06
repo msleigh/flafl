@@ -15,7 +15,7 @@ instance, but can be persuaded to take other actions.
 
 ## Requirements
 
-FLAFL requires Python 3.8+. It is tested on Linux and macOS.
+FLAFL requires Python 3.10+. It is tested on Linux and macOS.
 
 You  must have a netrc file containing valid login details for the Bamboo
 hostname used.

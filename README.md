@@ -23,7 +23,7 @@ opened, merged, or reviewed.
 
 ## Requirements
 
-FLAFL requires Python 3.8+. It is tested on Linux and macOS.
+FLAFL requires Python 3.10+. It is tested on Linux and macOS.
 
 You need:
 - A Jira Cloud instance with API access
