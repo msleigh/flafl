@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "flask>=2.3.2,<3.0.0",
+    "flask>=2.3.2,<4.0.0",
     "requests>=2.32.0,<3.0.0",
     "pyyaml>=6.0,<7.0",
     "urllib3>=2.2.2,<3.0.0",
