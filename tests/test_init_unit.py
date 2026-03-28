@@ -4,7 +4,6 @@ import importlib
 
 import flafl
 
-
 ENDPOINT = "/flafl/api/v1.0/events"
 
 
