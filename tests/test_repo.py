@@ -7,7 +7,6 @@ These tests simulate GitHub push event payloads.
 import pytest
 import flafl
 
-
 endpoint = "/flafl/api/v1.0/events"
 
 
