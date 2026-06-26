@@ -1,0 +1,41 @@
+name: Build Docs
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/docs.yml
+  push:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/docs.yml
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group doc
+
+      - name: Build docs
+        run: uv run zensical build --config-file docs/mkdocs.yml --strict
