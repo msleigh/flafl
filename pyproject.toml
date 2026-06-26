@@ -41,7 +41,7 @@ dev = [
     "coverage>=7.0.0,<8.0.0",
     "pytest>=7.3.1,<10.0.0",
 ]
-doc = ["mkdocs-material>=9.1.12,<10.0.0"]
+doc = ["zensical"]
 
 [tool.setuptools.packages.find]
 include = ["flafl*"]

@@ -35,4 +35,4 @@ jobs:
         run: |
           uv run black . --check
           uv run pytest -v
-          uv run mkdocs build --config-file docs/mkdocs.yml --strict
+          uv run zensical build --config-file docs/mkdocs.yml --strict
