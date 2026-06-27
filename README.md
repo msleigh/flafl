@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/flafl.svg)](https://pypi.org/project/flafl/)
 [![Changelog](https://img.shields.io/github/v/release/msleigh/flafl?include_prereleases&label=changelog)](https://github.com/msleigh/flafl/releases)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/msleigh/flafl/blob/main/LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 Flask application for listening to webhooks
 

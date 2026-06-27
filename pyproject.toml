@@ -18,6 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "flask>=2.3.2,<4.0.0",
@@ -37,11 +39,20 @@ Changelog = "https://github.com/msleigh/flafl/releases"
 
 [dependency-groups]
 dev = [
-    "black>=24.3.0,<27.0.0",
     "coverage>=7.0.0,<8.0.0",
     "pytest>=7.3.1,<10.0.0",
+    "ruff>=0.9.0",
 ]
 doc = ["zensical"]
 
 [tool.setuptools.packages.find]
 include = ["flafl*"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["flafl"]
