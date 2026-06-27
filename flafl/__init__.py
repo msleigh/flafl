@@ -10,13 +10,7 @@ import os
 
 from flask import Flask, jsonify, request
 
-from . import context
-from . import exceptions
-from . import github
-from . import helpers
-from . import jira
-from . import jsonparser
-from . import strategies
+from . import context, exceptions, github, helpers, jira, jsonparser, strategies
 
 
 # Configuration from environment variables
