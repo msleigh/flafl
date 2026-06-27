@@ -73,7 +73,7 @@ def get_pr_info(json_data, debug_info):
         }
     except KeyError as e:
         message = f"Pull request payload missing required field: {e}"
-        raise INVALID_USAGE(message, status_code=400, payload=debug_info)
+        raise INVALID_USAGE(message, status_code=400, payload=debug_info) from e
 
     return pr_info
 

@@ -5,6 +5,7 @@ These tests simulate GitHub pull request webhook payloads.
 """
 
 import pytest
+
 import flafl
 
 endpoint = "/flafl/api/v1.0/events"

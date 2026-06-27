@@ -6,11 +6,10 @@ the appropriate Jira transitions.
 """
 
 import abc
+
 from flask import jsonify
 
-from . import exceptions
-from . import helpers
-from . import jsonparser
+from . import exceptions, helpers, jsonparser
 
 INVALID_USAGE = exceptions.InvalidUsage
 
@@ -218,7 +217,6 @@ class Push(Strategy):
     def execute(self, json_data, debug_info, conns, config):
         ref = json_data.get("ref", "")
         commits = json_data.get("commits", [])
-        repo = json_data.get("repository", {})
 
         # Extract Jira keys from commit messages
         jira_keys = set()
