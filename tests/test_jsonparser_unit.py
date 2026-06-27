@@ -2,8 +2,7 @@
 
 import pytest
 
-from flafl import exceptions
-from flafl import jsonparser
+from flafl import exceptions, jsonparser
 
 
 def test_jsonparser_get_pr_info_missing_required_field_raises():
