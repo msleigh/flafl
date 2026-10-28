@@ -10,10 +10,12 @@ cd flafl
 uv sync --group dev
 ```
 
-Install the pre-commit hooks so linting runs automatically before each commit:
+Install pre-commit as a separate tool with Python 3.11 or newer, then install
+the hooks so linting runs automatically before each commit:
 
 ```bash
-uv run pre-commit install
+uv tool install --python 3.11 pre-commit
+pre-commit install
 ```
 
 ## Running tests
